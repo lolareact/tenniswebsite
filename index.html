@@ -1,41 +1,212 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Tennis Website</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Tennis Court Reservations</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            background-color: #f7f7f7;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%; //100vh;
+        }
+        .container {
+            width: 100%;
+            max-width: 100%; //400px;
+            background: #fff;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            text-align: center;
+        }
+        .containerS {
+    width: 100%;
+    max-width: 400px;
+    background: #fff;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    text-align: center;
+    align-content: center;
+    
+}
+
+        h2 {
+            margin-bottom: 20px;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #007BFF;
+            color: white;
+            cursor: pointer;
+            border: none;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .hidden {
+            display: none;
+        }
+        .nav {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+        .nav button {
+            background: none;
+            color: #007BFF;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .nav button:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
-
 <body>
-    <header>
-        <h1>Welcome to My  Tennis court Reservetion Website</h1>
-        <nav>
-            <ul>
-                <li><a href="#home">Home</a></li>
-                <li><a href="#about">About</a></li>
-                <li><a href="#contact">Contact</a></li>
-            </ul>
-        </nav>
-    </header>
 
-    <section id="home">
-        <h2>Home</h2>
-        <p>This is the home section.</p>
-    </section>
+    <!-- Login Page -->
+    <div class="containerS" id="loginPage">
+        <h2>Login</h2>
+        <input type="text" id="username" placeholder="Username">
+        <input type="password" id="password" placeholder="Password">
+        <button onclick="login()">Login</button>
+    </div>
 
-    <section id="about">
-        <h2>About</h2>
-        <p>This is the about section.</p>
-    </section>
+    <!-- Home Page -->
+    <div class="container hidden" id="homePage">
+        <div class="nav">
+            <button onclick="showPage('homePage')">Home</button>
+            <button onclick="showPage('reservationPage')">Reserve</button>
+            <button onclick="showPage('accountPage')">My Account</button>
+        </div>
+        <h2>My Reservations</h2>
+        <ul id="reservationsList">
+            <li>No reservations yet.</li>
+        </ul>
+    </div>
 
-    <section id="contact">
-        <h2>Contact</h2>
-        <button id="alertButton">Click Me!</button>
-    </section>
+    <!-- Reservation Page -->
+    <div class="container hidden" id="reservationPage">
+        <div class="nav">
+            <button onclick="showPage('homePage')">Home</button>
+            <button onclick="showPage('reservationPage')">Reserve</button>
+            <button onclick="showPage('accountPage')">My Account</button>
+        </div>
+        <div class="containerS">
+        <h2>Reserve a Court</h2>
+        <select id="court">
+            <option value="Court 1">Court 1</option>
+            <option value="Court 2">Court 2</option>
+            <option value="Court 3">Court 3</option>
+        </select>
+        <input type="date" id="date">
+        <input type="time" id="time">
+        <button onclick="reserveCourt()">Reserve</button>
+    </div>
+</div>
 
-    <script src="main.js"></script>
+    <!-- My Account Page -->
+    <div class="container hidden" id="accountPage">
+        <div class="nav">
+            <button onclick="showPage('homePage')">Home</button>
+            <button onclick="showPage('reservationPage')">Reserve</button>
+            <button onclick="showPage('accountPage')">My Account</button>
+        </div>
+        <h2>My Account</h2>
+        <p><strong>Username:</strong> <span id="accountUsername">Guest</span></p>
+        <button onclick="logout()">Logout</button>
+    </div>
+
+    <script>
+        function login() {
+            let username = document.getElementById("username").value;
+            if (username) {
+                localStorage.setItem("username", username);
+                document.getElementById("accountUsername").innerText = username;
+                showPage("homePage");
+            } else {
+                alert("Please enter a username.");
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem("username");
+            showPage("loginPage");
+        }
+
+        function showPage(page) {
+            document.getElementById("loginPage").classList.add("hidden");
+            document.getElementById("homePage").classList.add("hidden");
+            document.getElementById("reservationPage").classList.add("hidden");
+            document.getElementById("accountPage").classList.add("hidden");
+
+            document.getElementById(page).classList.remove("hidden");
+        }
+
+        function reserveCourt() {
+            let court = document.getElementById("court").value;
+            let date = document.getElementById("date").value;
+            let time = document.getElementById("time").value;
+            
+            if (!date || !time) {
+                alert("Please select a date and time.");
+                return;
+            }
+
+            let reservation = `${court} - ${date} at ${time}`;
+            let reservations = JSON.parse(localStorage.getItem("reservations")) || [];
+            reservations.push(reservation);
+            localStorage.setItem("reservations", JSON.stringify(reservations));
+
+            updateReservations();
+            showPage("homePage");
+        }
+
+        function updateReservations() {
+            let reservationsList = document.getElementById("reservationsList");
+            let reservations = JSON.parse(localStorage.getItem("reservations")) || [];
+
+            reservationsList.innerHTML = "";
+            if (reservations.length === 0) {
+                reservationsList.innerHTML = "<li>No reservations yet.</li>";
+            } else {
+                reservations.forEach(reservation => {
+                    let li = document.createElement("li");
+                    li.textContent = reservation;
+                    reservationsList.appendChild(li);
+                });
+            }
+        }
+
+        // Load username and reservations on page load
+        window.onload = function () {
+            let username = localStorage.getItem("username");
+            if (username) {
+                document.getElementById("accountUsername").innerText = username;
+                showPage("homePage");
+            } else {
+                showPage("loginPage");
+            }
+            updateReservations();
+        };
+    </script>
+
 </body>
-
 </html>
